@@ -9,7 +9,7 @@ jobs:
   install-test-build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4 #code auf ubuntu runner clonen
+      - uses: actions/checkout@v4 #code auf ubuntu runner/vm clonen
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
