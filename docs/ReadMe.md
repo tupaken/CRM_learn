@@ -1,1 +1,0 @@
-In dem Verzeichnis liegen alle Unterlagen für den Projekt
