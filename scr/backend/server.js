@@ -23,4 +23,4 @@ const swaggerSpec = require('./devtools/swagger')
 const Server = use('Server')
 const expressApp = Server.getInstance()
 
-expressApp.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
+expressApp.use('/src', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
