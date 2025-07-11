@@ -1,25 +1,25 @@
 services:
   frontend:
     build:
-      context: ./docs/frontend
+      context: ./src/frontend
       dockerfile: Dockerfile
     container_name: erp-frontend
     ports:
       - "8000:3000" # im Container läuft Nuxt auf Port 3000
     env_file:
-      - ./docs/frontend/.env
+      - ./src/frontend/.env
     networks:
       - erp-dev-network
 
   backend:
     build:
-      context: ./docs/backend
+      context: ./src/backend
       dockerfile: Dockerfile
     container_name: erp-backend
     ports:
       - "3333:3333" # AdonisJS launched intern auf 3333
     env_file:
-      - ./docs/backend/.env
+      - ./src/backend/.env
     networks:
       - erp-dev-network
 
