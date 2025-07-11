@@ -1,4 +1,8 @@
 // services/api.js
-export const health = () => {
-  return useAxios().get('/health')
-}
+
+import axios from 'axios'
+
+export const health = () => axios.get('/api/health')
+
+
+

@@ -17,7 +17,7 @@ const error  = ref(null)
 onMounted(async () => {
   try {
     const { data } = await health()
-    status.value = data.status
+    status.value = data.message
   } catch (e) {
     error.value = e
   }

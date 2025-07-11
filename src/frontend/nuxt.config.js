@@ -1,13 +1,17 @@
 export default {
-  // falls du @nuxtjs/axios einsetzt
   modules: [
     '@nuxtjs/axios',
+    '@nuxtjs/proxy'
   ],
   axios: {
-    baseURL: process.env.API_BASE_URL || 'http://localhost:3333',
+    proxy: true,
   },
-  publicRuntimeConfig: {
-    apiBaseUrl: process.env.API_BASE_URL || 'http://localhost:3333',
+  proxy: {
+    '/api/': {
+      target: 'http://erp-backend:3333',
+      pathRewrite: { '^/api/': '/api/' },
+      changeOrigin: true
+    }
   },
   server: {
     host: '0.0.0.0',

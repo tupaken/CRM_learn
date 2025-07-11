@@ -22,3 +22,8 @@ const Route = use('Route')
 Route.get('/api/hello', () => {
   return { message: 'Ich hab grischas arbeit gemacht' }
 })
+
+Route.get('/api/health', () => {
+  return { message: 'jawoll' }
+})
+

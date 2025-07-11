@@ -12,6 +12,9 @@ services:
       - erp-dev-network
     volumes:
       - ./src/backend/.env:/src/.env
+    environment:
+    - API_BASE_URL=http://erp-backend:3333
+
 
   backend:
     build:
