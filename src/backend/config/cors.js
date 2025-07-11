@@ -8,7 +8,7 @@ const corsConfig = {
     headers: true,
     exposeHeaders: ['Content-Disposition'],
     credentials: true,
-  }
+  };
   
-  export default corsConfig
+  module.exports = corsConfig;
   
