@@ -10,6 +10,8 @@ services:
       - ./src/frontend/.env
     networks:
       - erp-dev-network
+    volumes:
+      - ./src/backend/.env:/src/.env
 
   backend:
     build:
@@ -22,6 +24,8 @@ services:
       - ./src/backend/.env
     networks:
       - erp-dev-network
+    volumes:
+      - ./src/backend/.env:/src/.env
 
 networks:
   erp-dev-network:
