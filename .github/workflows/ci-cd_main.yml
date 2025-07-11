@@ -1,0 +1,110 @@
+name: CI/CD Pipeline
+
+on:
+ push:
+   branches:
+    -main
+    
+jobs:
+  install-test-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4 #code auf ubuntu runner/vm clonen
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install & Build Frontend
+        working-directory: ./docs/frontend
+        run: |
+          npm install
+          npm run build || echo "Kein build-script definiert"
+
+      - name: Install & Build Backend
+        working-directory: ./docs/backend
+        run: |
+          npm install
+          npm run build || echo "Kein build-script definiert"
+
+  deploy-frontend-s3:
+    runs-on: ubuntu-latest
+    needs: install-test-build
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Build Frontend
+        working-directory: ./docs/frontend
+        run: |
+          npm install
+          npm run build
+
+      - name: Deploy to S3 (if configured)
+        run: |
+          if [ -z "${{ secrets.S3_BUCKET_NAME }}" ]; then
+            echo "S3_BUCKET_NAME nicht gesetzt. Deployment wird übersprungen."
+            exit 0
+          fi
+          aws s3 sync docs/frontend/dist/ s3://$S3_BUCKET_NAME --delete
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
+
+  build-and-deploy-backend:
+    runs-on: ubuntu-latest
+    needs: install-test-build
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build & Push to ECR (if configured)
+        run: |
+          if [ -z "${{ secrets.ECR_REPO }}" ]; then
+            echo "ECR_REPO nicht gesetzt. Docker-Build wird übersprungen."
+            exit 0
+          fi
+          docker build -t $ECR_REPO:$GITHUB_SHA ./docs/backend
+          docker push $ECR_REPO:$GITHUB_SHA
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          ECR_REPO: ${{ secrets.ECR_REPO }}
+
+      - name: Trigger ECS deployment (if configured)
+        run: |
+          if [ -z "${{ secrets.ECS_SERVICE }}" ]; then
+            echo "ECS_SERVICE nicht gesetzt. ECS-Deployment wird übersprungen."
+            exit 0
+          fi
+          aws ecs update-service \
+            --cluster $ECS_CLUSTER \
+            --service $ECS_SERVICE \
+            --force-new-deployment
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          ECS_CLUSTER: ${{ secrets.ECS_CLUSTER }}
+          ECS_SERVICE: ${{ secrets.ECS_SERVICE }}
+
+      - name: Wait 5 minutes
+        run: sleep 300
+
+      - name: Run Migration (if ECS is configured)
+        run: |
+          if [ -z "${{ secrets.ECS_SERVICE }}" ]; then
+            echo "Migration wird übersprungen. ECS_SERVICE nicht definiert."
+            exit 0
+          fi
+          echo "Migration würde hier ausgeführt werden: node ace migration:run"
+          # Hier später echten ECS-Remote-Befehl einbauen (z. B. via SSM oder ecs execute-command)

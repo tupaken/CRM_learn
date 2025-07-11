@@ -1,0 +1,62 @@
+name: Dev Branch Pipeline
+
+on:
+  push:
+    branches-ignore:
+      - main
+  pull_request:
+    branches-ignore:
+      - main
+
+jobs:
+  backend-lint-test:
+    name: Backend – Lint & Test (AdonisJS)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Linter
+        run: npm run lint
+
+      - name: Run Format Check
+        run: npm run format -- --check || echo "Formatfehler (wird nicht abgebrochen)"
+
+      - name: Run Tests
+        run: node ace test
+
+  frontend-lint-test:
+    name: Frontend – Lint & Test (Nuxt.js)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Linter
+        run: npm run lint
+
+      - name: Run Format Check
+        run: npm run format -- --check || echo "Formatfehler (wird nicht abgebrochen)"
+
+      - name: Run Tests
+        run: npm run test:unit
