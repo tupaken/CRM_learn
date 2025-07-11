@@ -10,5 +10,5 @@ const corsConfig = {
     credentials: true,
   }
   
-  export default corsConfig
+module.exports = corsConfig
   
